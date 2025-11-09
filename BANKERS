@@ -1,0 +1,26 @@
+#include <sys/types.h>
+#include <unistd.h>
+#include <stdio.h>
+#include <stdlib.h>
+
+int main(void) {
+    pid_t pid = fork();  // ✅ clean fork() syntax
+
+    if (pid < 0) {
+        printf("\tfork error\n");
+    } 
+    else if (pid == 0) {
+        // Child process
+        printf("Child process id is %d\n", getpid());
+        // child exits immediately — becomes zombie while parent sleeps
+        _exit(0);
+    } 
+    else {
+        // Parent process
+        sleep(10);  // parent sleeps — child becomes zombie
+        printf("*****parent\n");
+        system("ps -axj | tail");  // check the process table (child will show as Z)
+    }
+
+    exit(0);
+}

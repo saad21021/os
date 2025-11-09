@@ -1,0 +1,91 @@
+#include <stdio.h>
+
+void main()
+{
+    int i, j, p;
+    int ar_t[30], br_t[30], cmp_t[30], tar_t[30], wt_t[30];
+    float avg_wt = 0, avg_tar = 0;
+    int comp_time = 0;
+
+    printf("Enter no. of total processes: \n");
+    scanf("%d", &p);
+
+    printf("Enter arrival time of process in sequence: \n");
+    for (i = 0; i < p; i++)
+    {
+        printf("P[%d] ", i + 1);
+        scanf("%d", &ar_t[i]);
+    }
+
+    printf("Enter burst time of process in sequence: \n");
+    for (j = 0; j < p; j++)
+    {
+        printf("P[%d] ", j + 1);
+        scanf("%d", &br_t[j]);
+    }
+
+    // ✅ Sort by Arrival Time (only new addition)
+    for (i = 0; i < p - 1; i++)
+    {
+        for (j = 0; j < p - i - 1; j++)
+        {
+            if (ar_t[j] > ar_t[j + 1])
+            {
+                int temp;
+                // swap arrival times
+                temp = ar_t[j];
+                ar_t[j] = ar_t[j + 1];
+                ar_t[j + 1] = temp;
+
+                // swap burst times to keep together
+                temp = br_t[j];
+                br_t[j] = br_t[j + 1];
+                br_t[j + 1] = temp;
+            }
+        }
+    }
+
+    printf("\nGantt Chart:\n");
+    printf(" ");
+
+    for (i = 0; i < p; i++)
+    {
+        comp_time = comp_time + br_t[i];
+        cmp_t[i] = comp_time;
+
+        printf("|  P%d  ", i + 1);
+    }
+    printf("|\n");
+
+    printf("0");
+    for (i = 0; i < p; i++)
+    {
+        printf("     %d", cmp_t[i]);
+    }
+    printf("\n");
+
+    for (i = 0; i < p; i++)
+    {
+        tar_t[i] = cmp_t[i] - ar_t[i];
+    }
+
+    for (i = 0; i < p; i++)
+    {
+        wt_t[i] = tar_t[i] - br_t[i];
+    }
+
+    printf("\nProcess\t\tarrival time\t\tburst time\tcompletion time\t\tturnaround time\t\twaiting time");
+    for (i = 0; i < p; i++)
+    {
+        printf("\nP[%d]\t\t%d\t\t\t%d\t\t\t%d\t\t%d\t\t\t%d",
+               i + 1, ar_t[i], br_t[i], cmp_t[i], tar_t[i], wt_t[i]);
+        avg_tar = avg_tar + tar_t[i];
+        avg_wt = avg_wt + wt_t[i];
+    }
+
+    printf("\nAverage Waiting Time: %.2f", (float)avg_wt / p);
+    printf("\nAverage Turnaround Time: %.2f", (float)avg_tar / p);
+
+    printf("\n");
+}
+  

@@ -1,0 +1,90 @@
+
+#include <stdio.h>
+
+#define MAX_FRAMES 10
+#define MAX_PAGES 50
+
+int findLRU(int time[], int f) {
+    int min = time[0], pos = 0;
+    for (int i = 1; i < f; i++) {
+        if (time[i] < min) {
+            min = time[i];
+            pos = i;
+        }
+    }
+    return pos;
+}
+
+int main() {
+    int frames[MAX_FRAMES], pages[MAX_PAGES], time[MAX_FRAMES];
+    int n, f, i, j, k;
+    int page_faults = 0, count = 0;
+
+    printf("Enter number of pages: ");
+    scanf("%d", &n);
+
+    printf("Enter the page reference string:\n");
+    for (i = 0; i < n; i++) {
+        scanf("%d", &pages[i]);
+    }
+
+    printf("Enter number of frames: ");
+    scanf("%d", &f);
+
+    // Initialize frames and time
+    for (i = 0; i < f; i++) {
+        frames[i] = -1;
+        time[i] = 0;
+    }
+
+    printf("\nPage\tFrames\t\tPage Fault\n");
+
+    for (i = 0; i < n; i++) {
+        int found = 0;
+
+        // Check if page is already in frame
+        for (j = 0; j < f; j++) {
+            if (frames[j] == pages[i]) {
+                count++;
+                time[j] = count; // Update access time
+                found = 1;
+                break;
+            }
+        }
+
+        if (!found) {
+            int empty = -1;
+            for (j = 0; j < f; j++) {
+                if (frames[j] == -1) {
+                    empty = j;
+                    break;
+                }
+            }
+
+            if (empty != -1) {
+                frames[empty] = pages[i];
+                count++;
+                time[empty] = count;
+            } else {
+                int pos = findLRU(time, f);
+                frames[pos] = pages[i];
+                count++;
+                time[pos] = count;
+            }
+            page_faults++;
+        }
+
+        // Display current frame status
+        printf("%d\t", pages[i]);
+        for (k = 0; k < f; k++) {
+            if (frames[k] != -1)
+                printf("%d ", frames[k]);
+            else
+                printf("- ");
+        }
+        printf("\t\t%s\n", found ? "No" : "Yes");
+    }
+
+    printf("\nTotal Page Faults = %d\n", page_faults);
+    return 0;
+}

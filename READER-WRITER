@@ -1,0 +1,78 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <unistd.h>
+#include <pthread.h>
+#include <semaphore.h>
+
+// Shared variables
+int sharedvar = 99;
+int readercount = 0;
+
+// Semaphores
+sem_t mutex, wrt;//wrt=db
+
+pthread_t writers[5], readers[5];
+
+void *writer(void *param) {
+    printf("\nWriter is trying to enterc");
+    sem_wait(&wrt);   // Request access to shared resource
+
+    printf("\nWriter has entered CS");
+    sharedvar++;
+    printf("\nWriter CHANGED THE VALUE OF SHARED VAR TO %d", sharedvar);
+
+    sem_post(&wrt);   // Release access
+    printf("\nWriter is out of CS");
+
+    pthread_exit(0);
+}
+
+// Reader function
+void *reader(void *param) {
+    sem_wait(&mutex);
+    readercount++;
+    if (readercount == 1) {
+        sem_wait(&wrt);   // First reader locks writers
+    }
+    sem_post(&mutex);
+
+    // Critical section
+    printf("\n%d reader is reading, sharedvar = %d", readercount, sharedvar);
+
+    sem_wait(&mutex);
+    readercount--;
+    if (readercount == 0) {
+        sem_post(&wrt);   // Last reader unlocks writers
+    }
+    sem_post(&mutex);
+
+    printf("\n%d Reader is done", readercount + 1);
+
+    pthread_exit(0);
+}
+
+// Main function
+int main() {
+    int n2, i;
+
+    printf("Enter the number of readers: ");
+    scanf("%d", &n2);
+
+    // Initialize semaphores
+    sem_init(&mutex, 0, 1);
+    sem_init(&wrt, 0, 1);
+
+    // Create threads
+    for (i = 0; i < n2; i++) {
+        pthread_create(&writers[i], NULL, writer, NULL);
+        pthread_create(&readers[i], NULL, reader, NULL);
+    }
+
+    // Join threads
+    for (i = 0; i < n2; i++) {
+        pthread_join(writers[i], NULL);
+        pthread_join(readers[i], NULL);
+    }
+
+    return 0;
+} explain line by line
